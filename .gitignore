@@ -1,0 +1,6 @@
+.terraform
+secrets.yaml
+*.tfstate*
+*.tfvars
+.sops.yaml
+/main.tf

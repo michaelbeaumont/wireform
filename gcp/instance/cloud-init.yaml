@@ -1,0 +1,41 @@
+#cloud-config
+package_upgrade: true
+packages:
+  - wireguard
+  - iptables
+write_files:
+  - path: /etc/sysctl.d/99-wireguard.conf
+    permissions: "0644"
+    content: |
+      net.ipv4.ip_forward=1
+  - path: /etc/wireguard/gen-private-key
+    permissions: "0700"
+    content: |
+      #!/usr/bin/env bash
+      pubkey_path=/etc/wireguard/pubkey
+      if [[ -f "$pubkey_path" ]]; then
+        echo "Refusing to run, pubkey file exists!"
+        exit 1
+      fi
+      private_key=$(wg genkey)
+      echo $private_key | wg pubkey > $pubkey_path
+      sed -i -e "s|%PRIVATE_KEY%|$private_key|" /etc/wireguard/wg0.conf
+  - path: /etc/wireguard/wg0.conf
+    permissions: "0600"
+    content: |
+      [Interface]
+      PrivateKey = %PRIVATE_KEY%
+      ListenPort = ${listen_port}
+      SaveConfig = false
+      Address = ${gateway}
+      PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -s ${cidr} -o ens4 -j MASQUERADE
+      PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -s ${cidr} -o ens4 -j MASQUERADE
+      %{~ for peer in peers }
+      [Peer]
+      ${indent(6, peer)}%{ endfor }
+runcmd:
+  - [/etc/wireguard/gen-private-key]
+  - [sysctl, -p, /etc/sysctl.d/99-wireguard.conf]
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, --no-block, wg-quick@wg0.service]
+  ${indent(2, runcmds)}

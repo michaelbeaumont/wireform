@@ -1,0 +1,15 @@
+[Interface]
+Address = 192.168.78.2/24
+${interface}
+PrivateKey = 6G8FZcldB97siYudHdIqjIYwp6hFCiTJcz7eTwRGzX4=
+DNS = 1.1.1.1
+
+PreUp = ./wg-vpn PreUp
+PostUp = ./wg-vpn PostUp
+PreDown = ./wg-vpn PreDown
+PostDown = ./wg-vpn PostDown
+
+[Peer]
+PublicKey = ${endpoint_pubkey}
+Endpoint = ${endpoint_ip}:${endpoint_port}
+AllowedIPs = 0.0.0.0/0
