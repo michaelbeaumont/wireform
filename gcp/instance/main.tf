@@ -161,6 +161,7 @@ output "ip" {
   value = trimspace(local.endpoint_ip)
 }
 output "public_key" {
+  sensitive = true
   value = trimspace(local.public_key)
 }
 output "interface_extra" {
