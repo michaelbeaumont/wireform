@@ -97,7 +97,7 @@ resource "google_compute_instance" "wireguard" {
   zone = local.zone
 
   tags = ["wg"]
-  machine_type = "f1-micro"
+  machine_type = "e2-micro"
 
   network_interface {
     subnetwork = data.google_compute_subnetwork.wireguard.self_link
