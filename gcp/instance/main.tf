@@ -75,6 +75,7 @@ resource "google_compute_firewall" "wireguard" {
 
 resource "google_secret_manager_secret" "wireguard-pubkey" {
   secret_id = "wireguard-pubkey"
+  labels = {}
   project = data.google_project.wireguard.project_id
   replication {
     automatic = "true"
@@ -98,6 +99,9 @@ resource "google_compute_instance" "wireguard" {
 
   tags = ["wg"]
   machine_type = "e2-micro"
+
+  labels = {}
+  resource_policies = []
 
   network_interface {
     subnetwork = data.google_compute_subnetwork.wireguard.self_link
